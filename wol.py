@@ -19,27 +19,31 @@ import re
 
 
 myconfig = {}
+mydir = os.path.dirname(os.path.abspath(__file__))
+
+def check_mac(macaddress):
+    # Check mac address format
+    found = re.fullmatch('^([A-F0-9]{2}(([:][A-F0-9]{2}){5}|([-][A-F0-9]{2}){5})|([\s][A-F0-9]{2}){5})|([a-f0-9]{2}(([:][a-f0-9]{2}){5}|([-][a-f0-9]{2}){5}|([\s][a-f0-9]{2}){5}))$', macaddress)
+    return found
 
 
-def wake_on_lan(host):
+def wake_on_lan(host, macaddress=None):
     """ Switches on remote computers using WOL. """
     global myconfig
 
-    try:
-      macaddress = myconfig[host]['mac']
+    if(macaddress is None):
+        try:
+            macaddress = myconfig[host]['mac']
+        except:
+            return False
 
-    except:
-      return False
-
-    # Check mac address format
-    found = re.fullmatch('^([A-F0-9]{2}(([:][A-F0-9]{2}){5}|([-][A-F0-9]{2}){5})|([\s][A-F0-9]{2}){5})|([a-f0-9]{2}(([:][a-f0-9]{2}){5}|([-][a-f0-9]{2}){5}|([\s][a-f0-9]{2}){5}))$', macaddress)
     #We must found 1 match , or the MAC is invalid
-    if found:
+    if check_mac(macaddress):
 	#If the match is found, remove mac separator [:-\s]
         macaddress = macaddress.replace(macaddress[2], '')
     else:
-        raise ValueError('Incorrect MAC address format')
-	
+        return False
+
     # Pad the synchronization stream.
     data = ''.join(['FFFFFFFFFFFF', macaddress * 20])
     send_data = b''
@@ -85,7 +89,7 @@ def usage():
 
 
 if __name__ == '__main__':
-        mydir = os.path.dirname(os.path.abspath(__file__))
+        #mydir = os.path.dirname(os.path.abspath(__file__))
         conf = loadConfig()
         try:
                 # Use macaddresses with any seperators.
@@ -102,7 +106,3 @@ if __name__ == '__main__':
                                 print('Magic packet should be winging its way')
         except:
                 usage()
-
-
-
-
