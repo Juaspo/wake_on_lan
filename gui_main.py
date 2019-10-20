@@ -19,12 +19,15 @@ import platform    # For getting the operating system name
 import subprocess  # For executing a shell command
 
 
-def btn_action(id="def"):
+def btn_action(id):
     host = btn[id].cget("text")
-    mac = labels[id].cget("text")
+    mac = mac_labels[id].cget("text")
     if (wake_on_lan(host, mac)):
         print(f"magic packet sent to {host}")
         label.config(bg="#5d5", text=host)
+        ip_labels[id].config(fg="#22d")
+
+        ping(ip_labels[id].cget("text"))
     else:
         print(f"Failed to send packet to\nHost: {host} \nMAC: {mac}")
         label.config(bg="red", text=host)
@@ -52,23 +55,34 @@ main_frame0.pack()
 main_frame1 = Frame(main_frame0)
 main_frame1.pack()
 
-main_frame2 = Frame(main_frame0)
-main_frame2.pack()
+#main_frame2 = Frame(main_frame0)
+#main_frame2.pack()
 
 
 label = Label(main_frame1, text="WOL", fg="black", font="Verdana 30 bold")
 label.pack()
 
-labels = []
-
-for i in range(5):
-    labels.append(Label(main_frame2, text="xx:xx:xx:xx:xx:xx", fg="black", font="Verdana 10 bold"))
-    labels[i].grid(row = i, column = 0)
-
+frames = []
+mac_labels = []
 btn = []
+ip_labels = []
+
+
+
 for i in range(5):
-    btn.append(Button(main_frame2, text="No host", width = 15, command=lambda n=i: btn_action(n)))
-    btn[i].grid(row = i, column = 1)
+    frames.append(Frame(main_frame0))
+    frames[i].pack()
+
+
+    mac_labels.append(Label(frames[i], text="xx:xx:xx:xx:xx:xx", fg="black", font="Verdana 10 bold"))
+    mac_labels[i].grid(row = 0, column = 0)
+
+    btn.append(Button(frames[i], text="No host", width = 15, command=lambda n=i: btn_action(n)))
+    btn[i].grid(row = 0, column = 1)
+
+    ip_labels.append(Label(frames[i], text="192.255.255.255", fg="black"))
+    ip_labels[i].grid(row = 1, column = 0)
+
 
 ############################################ Add unit Pane
 ########################################## TAB2
@@ -144,6 +158,15 @@ btn4.grid(row = 2, column = 1)
 
 btn5 = Button(conv_frame1, text="Test", width = 15, command = btn5_action)
 btn5.grid(row = 2, column = 0)
+
+############################################# Configurations
+
+tab3 = ttk.Frame(tabControl)            # Create a tab
+tabControl.add(tab3, text='Configure')      # Add the tab
+tabControl.pack(expand=1, fill="both")  # Pack to make visible
+
+conv_frame2 = Frame(tab3)
+conv_frame2.pack()
 
 
 ################################## Functions
@@ -221,8 +244,8 @@ def main(argv):
         try:
             btn[n].config(text = devices)
             mac=list(config_content[devices].values())[0]
-            if check_mac(mac): labels[n].config(text = mac)
-            else: labels[n].config(fg="red", text = mac)
+            if check_mac(mac): mac_labels[n].config(text = mac)
+            else: mac_labels[n].config(fg="red", text = mac)
             n += 1
         except KeyError:
             print("Error with key")
