@@ -15,8 +15,8 @@ from wol import wake_on_lan
 from wol import loadConfig
 from wol import check_mac
 
-import platform    # For getting the operating system name
-import subprocess  # For executing a shell command
+from ping_handler import ping
+from ping_handler import ping_threading
 
 
 def btn_action(id):
@@ -27,7 +27,8 @@ def btn_action(id):
         label.config(bg="#5d5", text=host)
         ip_labels[id].config(fg="#22d")
 
-        ping(ip_labels[id].cget("text"))
+        ping_threading()
+        #ping(ip_labels[id].cget("text"))
     else:
         print(f"Failed to send packet to\nHost: {host} \nMAC: {mac}")
         label.config(bg="red", text=host)
@@ -54,10 +55,6 @@ main_frame0.pack()
 
 main_frame1 = Frame(main_frame0)
 main_frame1.pack()
-
-#main_frame2 = Frame(main_frame0)
-#main_frame2.pack()
-
 
 label = Label(main_frame1, text="WOL", fg="black", font="Verdana 30 bold")
 label.pack()
@@ -172,19 +169,7 @@ conv_frame2.pack()
 ################################## Functions
 
 
-def ping(host):
-    """
-    Returns True if host (str) responds to a ping request.
-    Remember that a host may not respond to a ping (ICMP) request even if the host name is valid.
-    """
 
-    # Option for the number of packets as a function of
-    param = '-n' if platform.system().lower()=='windows' else '-c'
-
-    # Building the command. Ex: "ping -c 1 google.com"
-    command = ['ping', param, '1', host]
-
-    return subprocess.call(command) == 0
 
 def quit_func():
     if (mp.is_working()):
