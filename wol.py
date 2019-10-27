@@ -22,20 +22,20 @@ myconfig = {}
 mydir = os.path.dirname(os.path.abspath(__file__))
 
 def check_mac(macaddress):
+
+    if (len(macaddress) == 12):
+        macaddress = ':'.join(macaddress[i:i+2] for i in range(0,12,2))
+
+    macaddress = macaddress.upper()
     # Check mac address format
     found = re.fullmatch('^([A-F0-9]{2}(([:][A-F0-9]{2}){5}|([-][A-F0-9]{2}){5})|([\s][A-F0-9]{2}){5})|([a-f0-9]{2}(([:][a-f0-9]{2}){5}|([-][a-f0-9]{2}){5}|([\s][a-f0-9]{2}){5}))$', macaddress)
-    return found
+    if found:
+        return macaddress
 
 
-def wake_on_lan(host, macaddress=None):
+def wake_on_lan(host, broadcast_ip, macaddress):
     """ Switches on remote computers using WOL. """
     global myconfig
-
-    if(macaddress is None):
-        try:
-            macaddress = myconfig[host]['mac']
-        except:
-            return False
 
     #We must found 1 match , or the MAC is invalid
     if check_mac(macaddress):
@@ -56,32 +56,42 @@ def wake_on_lan(host, macaddress=None):
     # Broadcast it to the LAN.
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-    sock.sendto(send_data, (myconfig['General']['broadcast'], 7))
+
+    sock.sendto(send_data, (broadcast_ip, 7))
+    print(f"broadcasted data to {broadcast_ip}")
+
     return True
 
 
 def loadConfig():
-	""" Read in the Configuration file to get CDN specific settings
 
-	"""
-	global mydir
-	global myconfig
-	Config = configparser.ConfigParser()
-	Config.read(mydir+"/.wol_config.ini")
-	sections = Config.sections()
-	dict1 = {}
-	for section in sections:
-		options = Config.options(section)
+    """ Read in the Configuration file to get CDN specific settings
+    """
+    global mydir
+    global myconfig
+    Config = configparser.ConfigParser()
+    try:
+        Config.read(mydir+"/.wol_config.ini")
+    except Exception as e:
+        print("Duplicate entry:", e)
+    sections = Config.sections()
+    dict1 = {}
 
-		sectkey = section
-		myconfig[sectkey] = {}
+    for section in sections:
+        options = Config.options(section)
+        sectkey = section
+        myconfig[sectkey] = {}
 
+        for option in options:
+            if option == "quit_after_wol":
+                try:
+                    myconfig[sectkey][option] = Config.getboolean(section, option)
+                except ValueError:
+                    myconfig[sectkey][option] = "Err"
+            else:
+                myconfig[sectkey][option] = Config.get(section,option)
 
-		for option in options:
-			myconfig[sectkey][option] = Config.get(section,option)
-
-
-	return myconfig # Useful for testing
+    return myconfig # Useful for testing
 
 def usage():
 	print('Usage: wol.py [hostname]')
