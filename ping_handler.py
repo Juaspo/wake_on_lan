@@ -69,8 +69,14 @@ class PingFunctions():
 
         # Building the command. Ex: "ping -c 1 google.com"
         command = ['ping', param, "1", host]
-
-        return subprocess.call(command) == 0
+        
+        result = subprocess.Popen(command, stdout = subprocess.PIPE).stdout.read()
+        print ("The result from ping:", result)
+        
+        if ('time=' in str(result)):
+            return True
+        else:
+            return False
 
 
     def ping_threading(self, ip_address, host_name="Unknown device", repeat_count=1):
