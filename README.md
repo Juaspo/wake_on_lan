@@ -9,9 +9,13 @@ For a quick and lazy way to create the configuration file, see [The Wake On Lan 
 Usage GUI
 -------
 
-Run start.bat if running in windows
+Windows:
+Make sure pythin is installed.
 
-run gui_main.py in Linux env.
+    Run start.bat
+
+Linux:
+
     python3 gui_main.py
 
 
