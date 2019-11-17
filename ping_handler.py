@@ -3,6 +3,7 @@ import time
 import threading
 import platform    # For getting the operating system name
 import subprocess  # For executing a shell command
+from _thread import interrupt_main
 from tkinter import messagebox
 
 
@@ -12,12 +13,13 @@ class StoppableThread(threading.Thread):
     regularly for the stopped() condition."""
 
 
-    def __init__(self, ip_address, host_name, nr_of_runs):
+    def __init__(self, ip_address, host_name, nr_of_runs, ping):
         super(StoppableThread, self).__init__()
         self._stop_event = threading.Event()
         self.host_name = host_name
         self.nr_of_runs = nr_of_runs
         self.ip_address = ip_address
+        self.ping = ping
 
     def stop(self):
         print("stopping thread")
@@ -33,45 +35,57 @@ class StoppableThread(threading.Thread):
         while (not self.stopped()):
 
             print("run nr", run_nr, "for host", self.host_name)
-            if ping(self.ip_address):
-                messagebox.showinfo("Success", f"{self.host_name} responded")
+            if self.ping(self.ip_address):
+                #messagebox.askquestion("Success", responded, )
+
                 self.stop()
                 print("Thread stopped:", self.stopped())
+                if messagebox.askyesno("Success! Quit application?", f"[{self.host_name}] responded!\nDo you wish to exit application?", icon="info"):
+                    print("Exit program")
+                    interrupt_main()
+
+                else:
+                    print("Continue running")
+
+
             if(run_nr >= self.nr_of_runs):
-                messagebox.showwarning("Failed", f"No response from {self.host_name}")
+                messagebox.showwarning("Failed", f"No response from [{self.host_name}]")
                 self.stop()
                 print("Thread stopped:", self.stopped())
 
             time.sleep(5)
             run_nr += 1
 
+class PingFunctions():
 
-def ping_threading(ip_address, host_name="Unknown device", repeat_count=1):
+    def ping(self, host):
+        """
+        Returns True if host (str) responds to a ping request.
+        Remember that a host may not respond to a ping (ICMP) request even if the host name is valid.
+        """
 
-    counterThread = StoppableThread(ip_address, host_name, repeat_count)
-    counterThread.setDaemon(True)
+        # Option for the number of packets as a function of
+        param = '-n' if platform.system().lower()=='windows' else '-c'
 
-    if not counterThread.isAlive():
-        try:
-            counterThread.start()
-        except Exception as e:
-            print("Error: unable to start thread", e)
-        return True
-    else:
-        print("Thread already running")
-        return False
+        # Building the command. Ex: "ping -c 1 google.com"
+        command = ['ping', param, "1", host]
+
+        return subprocess.call(command) == 0
 
 
-def ping(host):
-    """
-    Returns True if host (str) responds to a ping request.
-    Remember that a host may not respond to a ping (ICMP) request even if the host name is valid.
-    """
+    def ping_threading(self, ip_address, host_name="Unknown device", repeat_count=1):
 
-    # Option for the number of packets as a function of
-    param = '-n' if platform.system().lower()=='windows' else '-c'
+        if (len(host_name) == 0): host_name="Unknown device"
 
-    # Building the command. Ex: "ping -c 1 google.com"
-    command = ['ping', param, "1", host]
+        counterThread = StoppableThread(ip_address, host_name, repeat_count, self.ping)
+        counterThread.setDaemon(True)
 
-    return subprocess.call(command) == 0
+        if not counterThread.isAlive():
+            try:
+                counterThread.start()
+            except Exception as e:
+                print("Error: unable to start thread", e)
+            return True
+        else:
+            print("Thread already running")
+            return False

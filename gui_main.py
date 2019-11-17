@@ -15,9 +15,8 @@ from wol import wake_on_lan
 from wol import loadConfig
 from wol import check_mac
 
-from ping_handler import ping
-from ping_handler import ping_threading
-
+import ping_handler
+pf = ping_handler.PingFunctions()
 
 def btn_action(id):
     global quit_after_wol_var
@@ -40,7 +39,7 @@ def btn_action(id):
     repeat_number=repeat_ping_entry.get()
     if(validate_ip(ip_nr) and len(repeat_number) and not repeat_number == "0"):
         try:
-            ping_threading(ip_nr, host, int(repeat_number))
+            pf.ping_threading(ip_nr, host, int(repeat_number))
             repeat_ping_entry.config(fg="black")
         except ValueError:
             repeat_ping_entry.config(fg="red")
@@ -189,6 +188,9 @@ def btn4_action():
         text_entry_mac.delete(0, END)
         text_entry_ip.delete(0, END)
 
+def test_function():
+    print("Success!!! wow wow wow!!")
+
 def btn5_action():
     ip_addr=text_entry_ip.get()
     bc_ip = general_ip_entry.get()
@@ -205,7 +207,8 @@ def btn5_action():
 
     if validate_ip(ip_addr):
         text_entry_ip.config(fg="black")
-        ping_threading(ip_address=ip_addr, host_name=host_n)
+        pf.ping_threading(ip_address=ip_addr, host_name=host_n)
+        print ("yoyoyo!!")
     else:
         text_entry_ip.config(fg="red")
 
@@ -281,21 +284,22 @@ def set_btn_labels():
     n = 0;
 
     for devices in config_content:
-        try:
-            print("number:",n)
-            btn[n].config(text = devices)
-            mac=config_content[devices]["mac"]
-            if check_mac(mac): mac_labels[n].config(text = mac)
-            else: mac_labels[n].config(fg="red", text = mac)
-            if "ip" in config_content[devices]:
-                ip_addr=config_content[devices]["ip"]
-                ip_labels[n].config(text=ip_addr)
-            else:
-                print("No ip address for", config_content[devices])
+        if devices != "Config":
+            try:
+                print("number:",n)
+                btn[n].config(text = devices)
+                mac=config_content[devices]["mac"]
+                if check_mac(mac): mac_labels[n].config(text = mac)
+                else: mac_labels[n].config(fg="red", text = mac)
+                if "ip" in config_content[devices]:
+                    ip_addr=config_content[devices]["ip"]
+                    ip_labels[n].config(text=ip_addr)
+                else:
+                    print("No ip address for", config_content[devices])
 
-            n += 1
-        except KeyError:
-            print("Error with key")
+                n += 1
+            except KeyError:
+                print("Error with key:", devices)
 
         if n >= number_of_items:
             return
@@ -328,6 +332,7 @@ def set_configuration():
 def main(argv):
     set_btn_labels()
     set_configuration()
+
     try:
         opts, args = getopt.getopt(argv, "hs:t:", ["help"])
     except getopt.GetoptError:

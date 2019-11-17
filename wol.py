@@ -106,7 +106,7 @@ if __name__ == '__main__':
                 if sys.argv[1] == 'list':
                         print('Configured Hosts:')
                         for i in conf:
-                                if i != 'General':
+                                if i != 'Config':
                                         print('\t',i)
                         print('\n')
                 else:
