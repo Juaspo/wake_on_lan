@@ -6,8 +6,16 @@ wol.py is A small Python 3 script to allow the sending of a WOL Magic packet so 
 For a quick and lazy way to create the configuration file, see [The Wake On Lan section of my router build documentation](https://www.bentasker.co.uk/documentation/linux/258-usurping-the-bthomehub-with-a-raspberry-pi-part-three-routing-remote-administration-and-utilities#WakeOnLan)
 
 
+Usage GUI
+-------
 
-Usage
+Run start.bat if running in windows
+
+run gui_main.py in Linux env.
+    python3 gui_main.py
+
+
+Usage headless
 -------
 
     wol.py [hostname]
@@ -21,13 +29,19 @@ or
 Configuration File
 --------------------
 
-The configuration file is just a basic INI file, containing one section per host;
+    #braodcast: Broadcast address for wake on lan. Should be on same lan as units are on (ip address)
+    #repeat_ping: How many times to repeat ping before giving up. Tries a ping once every 5 second (int)
+    #quit_after_wol: Should the application shutdown after magic packet is sent (true/false)
 
-    [General]
-    broadcast=192.168.1.255
-    
-    [MyPc]
-    mac=00:13:0d:e4:60:61
+    [Config]
+    broadcast=192.168.0.255
+    repeat_ping=20
+    quit_after_wol=false
+
+    [Test unit]
+    mac=AB:CD:EF:01:23:45
+    ip=192.168.0.1
+
 
     
     
