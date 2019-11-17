@@ -14,7 +14,7 @@ Make sure pythin is installed.
 
     Run start.bat
 
-Linux:
+Linux terminal:
 
     python3 gui_main.py
 
