@@ -14,7 +14,7 @@ Make sure pythin is installed.
 
     Run start.bat
 
-Linux terminal:
+Linux terminal (need to be in wake_on_lan dir):
 
     python3 gui_main.py
 
