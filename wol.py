@@ -110,9 +110,9 @@ if __name__ == '__main__':
                     print('\t',i)
                     print('\n')
         else:
-            if not wake_on_lan(sys.argv[1]):
-                print('Invalid Hostname specified')
-            else:
+            if wake_on_lan(sys.argv[1]):
                 print('Magic packet should be winging its way')
+            else:
+                print('Invalid Hostname specified')
     except:
          usage()
