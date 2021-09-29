@@ -99,20 +99,20 @@ def usage():
 
 
 if __name__ == '__main__':
-        #mydir = os.path.dirname(os.path.abspath(__file__))
-        conf = loadConfig()
-        try:
-                # Use macaddresses with any seperators.
-                if sys.argv[1] == 'list':
-                        print('Configured Hosts:')
-                        for i in conf:
-                                if i != 'Config':
-                                        print('\t',i)
-                        print('\n')
-                else:
-                        if not wake_on_lan(sys.argv[1]):
-                                print('Invalid Hostname specified')
-                        else:
-                                print('Magic packet should be winging its way')
-        except:
-                usage()
+    #mydir = os.path.dirname(os.path.abspath(__file__))
+    conf = loadConfig()
+    try:
+        # Use macaddresses with any seperators.
+        if sys.argv[1] == 'list':
+            print('Configured Hosts:')
+            for i in conf:
+                if i != 'Config':
+                    print('\t',i)
+                    print('\n')
+        else:
+            if not wake_on_lan(sys.argv[1]):
+                print('Invalid Hostname specified')
+            else:
+                print('Magic packet should be winging its way')
+    except:
+         usage()
